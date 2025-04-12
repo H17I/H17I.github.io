@@ -12,6 +12,108 @@
     <h1>Highway-17 Interactive</h1>
     <p>Under construction...</p>
     <img src="https://github.com/H17I/.github/blob/main/H17IBanner.jpg?raw=true" width="500"> <img src="https://github.com/H17I/.github/blob/main/H17IIcon.png?raw=true" width="250">
+    <img id="hi">
 </body>
+
+    <script>
+  const todoData = {
+"C and C++ support.": true,
+"Easy integration into already existing projects.": true,
+"Simple small and readable XML config.": true,
+"Custom OS-dependent auxiliary files for pre-installation of required dependencies or other work before compiling binaries for both Windows and Linux.": true,
+"GNU support for Windows.": true,
+"GNU support for Linux.": true,
+"Clang support for Windows.": false,
+"Clang support for Linux.": true,
+"CMake support for Windows.": false,
+"CMake support for Linux.": false,
+"Build process logging.": true,
+"Extremely small (<7kb without auxiliary files).": true
+
+  };
+
+    function wrapText(ctx, text, maxWidth) {
+      const words = text.split(' ');
+      let lines = [], currentLine = words[0];
+
+      for (let i = 1; i < words.length; i++) {
+        const word = words[i];
+        const width = ctx.measureText(currentLine + ' ' + word).width;
+        if (width < maxWidth) {
+          currentLine += ' ' + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+      return lines;
+    }
+
+    function generateSVG(data) {
+      const xmlns = "http://www.w3.org/2000/svg";
+      const width = 800;
+      const padding = 20;
+      const maxTextWidth = width - padding * 2 - 30; // leave room for emoji
+      const fontSize = 16;
+      const lineHeight = 24;
+      const font = "16px 'Segoe UI', 'Roboto Mono', monospace";
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = font;
+
+      let lines = [];
+
+      for (const [task, done] of Object.entries(data)) {
+        const emoji = done ? "🟢" : "🔴";
+        const wrapped = wrapText(ctx, task, maxTextWidth);
+        lines.push({ emoji, wrapped });
+      }
+
+      const totalLines = lines.reduce((acc, l) => acc + l.wrapped.length, 0);
+      const height = padding * 2 + totalLines * lineHeight;
+
+      const svg = document.createElementNS(xmlns, "svg");
+      svg.setAttribute("width", width);
+      svg.setAttribute("height", height);
+      svg.setAttribute("xmlns", xmlns);
+
+      // Background
+      const bg = document.createElementNS(xmlns, "rect");
+      bg.setAttribute("x", 0);
+      bg.setAttribute("y", 0);
+      bg.setAttribute("width", width);
+      bg.setAttribute("height", height);
+      bg.setAttribute("rx", 16);
+      bg.setAttribute("fill", "#1e1e1e");
+      svg.appendChild(bg);
+
+      // Add text
+      let y = padding + 5;
+      for (const item of lines) {
+        for (let i = 0; i < item.wrapped.length; i++) {
+          const lineText = document.createElementNS(xmlns, "text");
+          lineText.setAttribute("x", padding);
+          lineText.setAttribute("y", y);
+          lineText.setAttribute("fill", item.emoji === "🟢" ? "#8ef28f" : "#ff6b6b");
+          lineText.setAttribute("font-family", "'Segoe UI', 'Roboto Mono', monospace");
+          lineText.setAttribute("font-size", `${fontSize}px`);
+          lineText.textContent = (i === 0 ? item.emoji + "  " : "    ") + item.wrapped[i];
+          svg.appendChild(lineText);
+          y += lineHeight;
+        }
+      }
+
+      return svg;
+    }
+
+  const svgEl = generateSVG(todoData);
+  const svgString = new XMLSerializer().serializeToString(svgEl);
+const svgBlob = new Blob([svgString], {type:"image/svg+xml"});
+const url = URL.createObjectURL(svgBlob);
+console.log(url);
+document.getElementById("hi").src = url;
+</script>
 
 </html>
